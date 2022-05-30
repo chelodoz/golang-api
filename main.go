@@ -1,19 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
+	handler "golang-api/handler"
+	router "golang-api/router"
+)
 
-	"github.com/gorilla/mux"
+var (
+	httpRouter router.Router      = router.NewMuxRouter()
+	msgHandler handler.MsgHandler = handler.NewMsgHandler()
 )
 
 func main() {
-	router := mux.NewRouter()
 	const port string = ":8080"
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Up and running...")
-	})
-	log.Println("Server listening on port", port)
-	log.Fatalln(http.ListenAndServe(port, router))
+	httpRouter.GET("/", msgHandler.GetMsgs)
+	httpRouter.SERVE(port)
 }
