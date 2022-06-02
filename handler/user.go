@@ -31,32 +31,23 @@ func NewUserHandler(service service.UserService) UserHandler {
 }
 
 func (u *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-
 	var createUserRequest dto.CreateUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&createUserRequest); err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(dto.ServiceError{Message: err.Error()})
+		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
 		return
 	}
 
-	err := validate.Struct(&createUserRequest)
+	if err := validate.Struct(&createUserRequest); err != nil {
+		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
+		return
+	}
 
+	user, err := u.service.CreateUser(createUserRequest)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(dto.ServiceError{Message: err.Error()})
+		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
 		return
 	}
 
-	_, err = u.service.CreateUser(createUserRequest)
-
-	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(dto.ServiceError{Message: err.Error()})
-		return
-	}
-
-	rw.WriteHeader(http.StatusCreated)
-	json.NewEncoder(rw).Encode(dto.ServiceError{Message: "Success!"})
+	dto.WriteResponse(rw, http.StatusCreated, user)
 }
