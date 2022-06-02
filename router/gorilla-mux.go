@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"golang-api/util"
 	"log"
 	"net/http"
 	"os"
@@ -35,22 +36,22 @@ func (*muxRouter) PATCH(uri string, f func(http.ResponseWriter, *http.Request)) 
 	muxDispatcher.HandleFunc(uri, f).Methods("PATCH")
 }
 
-func (*muxRouter) SERVE(port string) {
+func (*muxRouter) SERVE(config util.Config) {
 
 	log := log.New(os.Stdout, "golang-api ", log.LstdFlags)
 	// create a new server
 	server := http.Server{
-		Addr:         port,              // configure the bind address
-		Handler:      muxDispatcher,     // set the default handler
-		ErrorLog:     log,               // set the logger for the server
-		ReadTimeout:  5 * time.Second,   // max time to read request from the client
-		WriteTimeout: 10 * time.Second,  // max time to write response to the client
-		IdleTimeout:  120 * time.Second, // max time for connections using TCP Keep-Alive
+		Addr:         config.HTTPServerAddress, // configure the bind address
+		Handler:      muxDispatcher,            // set the default handler
+		ErrorLog:     log,                      // set the logger for the server
+		ReadTimeout:  5 * time.Second,          // max time to read request from the client
+		WriteTimeout: 10 * time.Second,         // max time to write response to the client
+		IdleTimeout:  120 * time.Second,        // max time for connections using TCP Keep-Alive
 	}
 	go func() {
-		log.Printf("Mux HTTP Server running on port: %v", port)
+		log.Printf("Mux HTTP Server running on port: %v", config.HTTPServerAddress)
 
-		err := http.ListenAndServe(port, muxDispatcher)
+		err := http.ListenAndServe(config.HTTPServerAddress, muxDispatcher)
 		if err != nil {
 			log.Printf("Error starting server: %s\n", err)
 			os.Exit(1)

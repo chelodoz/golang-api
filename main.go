@@ -1,17 +1,27 @@
 package main
 
 import (
-	handler "golang-api/handler"
-	router "golang-api/router"
-)
-
-var (
-	httpRouter router.Router      = router.NewMuxRouter()
-	msgHandler handler.MsgHandler = handler.NewMsgHandler()
+	"golang-api/database"
+	"golang-api/handler"
+	"golang-api/repository"
+	"golang-api/router"
+	"golang-api/service"
+	"golang-api/util"
+	"log"
 )
 
 func main() {
-	const port string = ":8080"
-	httpRouter.GET("/", msgHandler.GetMsgs)
-	httpRouter.SERVE(port)
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+	db, _ := database.DBConnection(config)
+
+	userRepository := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepository)
+	userHandler := handler.NewUserHandler(userService)
+
+	httpRouter := router.NewMuxRouter()
+	httpRouter.POST("/user", userHandler.CreateUser)
+	httpRouter.SERVE(config)
 }
