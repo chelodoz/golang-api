@@ -21,8 +21,8 @@ func (UserGorm) TableName() string {
 	return "users"
 }
 
-func (u UserGorm) ToEntity() (entity.User, error) {
-	return entity.User{
+func (u UserGorm) ToEntity() (*entity.User, error) {
+	return &entity.User{
 		ID:        u.ID,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
@@ -57,8 +57,7 @@ func (userRepository *userRepository) CreateUser(user entity.User) (*entity.User
 	if err != nil {
 		return nil, err
 	}
-	user, err = userGorm.ToEntity()
-	return &user, err
+	return userGorm.ToEntity()
 }
 
 func (userRepository *userRepository) UpdateUser(user entity.User) (*entity.User, error) {
@@ -77,8 +76,7 @@ func (userRepository *userRepository) GetUser(ID uint) (*entity.User, error) {
 	if err != nil {
 		return &entity.User{}, err
 	}
-	user, err := userGorm.ToEntity()
-	return &user, err
+	return userGorm.ToEntity()
 }
 
 func (userRepository *userRepository) GetUsers() ([]entity.User, error) {
@@ -91,7 +89,7 @@ func (userRepository *userRepository) GetUsers() ([]entity.User, error) {
 		if err != nil {
 			return nil, err
 		}
-		users = append(users, user)
+		users = append(users, *user)
 	}
 	return users, err
 }

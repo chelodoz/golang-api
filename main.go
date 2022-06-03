@@ -24,5 +24,6 @@ func main() {
 	httpRouter := router.NewMuxRouter()
 	httpRouter.POST("/users", userHandler.CreateUser)
 	httpRouter.GET("/users", userHandler.GetUsers)
+	httpRouter.GET("/users/{id}", userHandler.GetUser)
 	httpRouter.SERVE(config)
 }
