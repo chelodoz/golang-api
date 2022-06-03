@@ -15,12 +15,27 @@ type UserResponse struct {
 	LastName  string `json:"lastName"`
 }
 
+type UsersResponse []*UserResponse
+
 func NewUserResponse(user entity.User) *UserResponse {
 	return &UserResponse{
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 	}
+}
+func NewUsersResponse(users []entity.User) *UsersResponse {
+	var usersResponse UsersResponse
+
+	for _, user := range users {
+		userResponse := UserResponse{
+			Email:     user.Email,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+		}
+		usersResponse = append(usersResponse, &userResponse)
+	}
+	return &usersResponse
 }
 func (c *CreateUserRequest) ToEntity() *entity.User {
 	return &entity.User{

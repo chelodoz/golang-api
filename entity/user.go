@@ -9,7 +9,7 @@ type User struct {
 }
 type UserRepository interface {
 	GetUser(ID uint) (*User, error)
-	GetUsers() (*[]User, error)
+	GetUsers() ([]User, error)
 	CreateUser(User User) (*User, error)
 	UpdateUser(User User) (*User, error)
 	DeleteUser(ID uint) error

@@ -15,7 +15,7 @@ type UserHandler interface {
 	CreateUser(rw http.ResponseWriter, r *http.Request)
 	// DeleteUser(rw http.ResponseWriter, r *http.Request)
 	// GetUser(rw http.ResponseWriter, r *http.Request)
-	// GetUsers(rw http.ResponseWriter, r *http.Request)
+	GetUsers(rw http.ResponseWriter, r *http.Request)
 	// UpdateUser(rw http.ResponseWriter, r *http.Request)
 }
 
@@ -28,6 +28,17 @@ func NewUserHandler(service service.UserService) UserHandler {
 	return &userHandler{
 		service: service,
 	}
+}
+
+func (u *userHandler) GetUsers(rw http.ResponseWriter, r *http.Request) {
+
+	users, err := u.service.GetUsers()
+	if err != nil {
+		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
+		return
+	}
+
+	dto.WriteResponse(rw, http.StatusOK, users)
 }
 
 func (u *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {

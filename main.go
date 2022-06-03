@@ -22,6 +22,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 
 	httpRouter := router.NewMuxRouter()
-	httpRouter.POST("/user", userHandler.CreateUser)
+	httpRouter.POST("/users", userHandler.CreateUser)
+	httpRouter.GET("/users", userHandler.GetUsers)
 	httpRouter.SERVE(config)
 }

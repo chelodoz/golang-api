@@ -81,7 +81,7 @@ func (userRepository *userRepository) GetUser(ID uint) (*entity.User, error) {
 	return &user, err
 }
 
-func (userRepository *userRepository) GetUsers() (*[]entity.User, error) {
+func (userRepository *userRepository) GetUsers() ([]entity.User, error) {
 	var usersGorm []UserGorm
 	var users []entity.User
 	err := userRepository.DB.Find(&usersGorm).Error
@@ -93,5 +93,5 @@ func (userRepository *userRepository) GetUsers() (*[]entity.User, error) {
 		}
 		users = append(users, user)
 	}
-	return &users, err
+	return users, err
 }
