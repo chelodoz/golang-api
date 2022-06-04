@@ -15,7 +15,7 @@ var validate *validator.Validate
 
 type UserHandler interface {
 	CreateUser(rw http.ResponseWriter, r *http.Request)
-	// DeleteUser(rw http.ResponseWriter, r *http.Request)
+	DeleteUser(rw http.ResponseWriter, r *http.Request)
 	GetUser(rw http.ResponseWriter, r *http.Request)
 	GetUsers(rw http.ResponseWriter, r *http.Request)
 	// UpdateUser(rw http.ResponseWriter, r *http.Request)
@@ -52,6 +52,20 @@ func (u *userHandler) GetUser(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	dto.WriteResponse(rw, http.StatusOK, user)
+}
+
+func (u *userHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
+	userId := getUserID(r)
+	if _, err := u.service.GetUser(userId); err != nil {
+		dto.WriteResponse(rw, http.StatusNotFound, dto.ServiceError{Message: "The specified resource does not exist"})
+		return
+	}
+
+	if err := u.service.DeleteUser(userId); err != nil {
+		dto.WriteResponse(rw, http.StatusInternalServerError, dto.ServiceError{Message: err.Error()})
+		return
+	}
+	rw.WriteHeader(http.StatusNoContent)
 }
 
 func (u *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {

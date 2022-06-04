@@ -25,5 +25,6 @@ func main() {
 	httpRouter.POST("/users", userHandler.CreateUser)
 	httpRouter.GET("/users", userHandler.GetUsers)
 	httpRouter.GET("/users/{id}", userHandler.GetUser)
+	httpRouter.DELETE("/users/{id}", userHandler.DeleteUser)
 	httpRouter.SERVE(config)
 }

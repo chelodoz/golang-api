@@ -35,6 +35,9 @@ func (*muxRouter) POST(uri string, f func(http.ResponseWriter, *http.Request)) {
 func (*muxRouter) PATCH(uri string, f func(http.ResponseWriter, *http.Request)) {
 	muxDispatcher.HandleFunc(uri, f).Methods("PATCH")
 }
+func (*muxRouter) DELETE(uri string, f func(http.ResponseWriter, *http.Request)) {
+	muxDispatcher.HandleFunc(uri, f).Methods("DELETE")
+}
 
 func (*muxRouter) SERVE(config util.Config) {
 
