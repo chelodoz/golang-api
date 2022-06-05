@@ -49,14 +49,15 @@ func (c *CreateUserRequest) ToEntity() *entity.User {
 		Email:     c.Email,
 		FirstName: c.FirstName,
 		LastName:  c.LastName,
+		Password:  c.Password,
 	}
 }
 func (c *UpdateUserRequest) ToEntity() *entity.User {
 	return &entity.User{
 		ID:        c.ID,
+		Email:     c.Email,
 		FirstName: c.FirstName,
 		LastName:  c.LastName,
-		Email:     c.Email,
 		Password:  c.Password,
 	}
 }

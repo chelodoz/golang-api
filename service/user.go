@@ -3,6 +3,7 @@ package service
 import (
 	"golang-api/dto"
 	"golang-api/entity"
+	"golang-api/util"
 )
 
 type UserService interface {
@@ -24,6 +25,11 @@ func NewUserService(repository entity.UserRepository) UserService {
 }
 
 func (service *userService) CreateUser(createUserRequest dto.CreateUserRequest) (*dto.UserResponse, error) {
+	hashedPassword, err := util.HashPassword(createUserRequest.Password)
+	if err != nil {
+		return nil, err
+	}
+	createUserRequest.Password = hashedPassword
 
 	user, err := service.userRepository.CreateUser(*createUserRequest.ToEntity())
 	if err != nil {
