@@ -18,7 +18,7 @@ type UserHandler interface {
 	DeleteUser(rw http.ResponseWriter, r *http.Request)
 	GetUser(rw http.ResponseWriter, r *http.Request)
 	GetUsers(rw http.ResponseWriter, r *http.Request)
-	// UpdateUser(rw http.ResponseWriter, r *http.Request)
+	UpdateUser(rw http.ResponseWriter, r *http.Request)
 }
 
 type userHandler struct {
@@ -66,6 +66,28 @@ func (u *userHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rw.WriteHeader(http.StatusNoContent)
+}
+func (u *userHandler) UpdateUser(rw http.ResponseWriter, r *http.Request) {
+	var updateUserRequest dto.UpdateUserRequest
+	userId := getUserID(r)
+	updateUserRequest.ID = userId
+
+	if err := json.NewDecoder(r.Body).Decode(&updateUserRequest); err != nil {
+		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
+		return
+	}
+
+	if err := validate.Struct(&updateUserRequest); err != nil {
+		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
+		return
+	}
+
+	user, err := u.service.UpdateUser(updateUserRequest)
+	if err != nil {
+		dto.WriteResponse(rw, http.StatusInternalServerError, dto.ServiceError{Message: err.Error()})
+		return
+	}
+	dto.WriteResponse(rw, http.StatusOK, user)
 }
 
 func (u *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {

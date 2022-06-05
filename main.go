@@ -26,5 +26,6 @@ func main() {
 	httpRouter.GET("/users", userHandler.GetUsers)
 	httpRouter.GET("/users/{id}", userHandler.GetUser)
 	httpRouter.DELETE("/users/{id}", userHandler.DeleteUser)
+	httpRouter.PATCH("/users/{id}", userHandler.UpdateUser)
 	httpRouter.SERVE(config)
 }

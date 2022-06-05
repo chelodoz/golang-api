@@ -9,7 +9,7 @@ type UserService interface {
 	CreateUser(user dto.CreateUserRequest) (*dto.UserResponse, error)
 	GetUsers() (*dto.UsersResponse, error)
 	GetUser(ID uint) (*dto.UserResponse, error)
-	// UpdateUser(User entity.User) (*entity.User, error)
+	UpdateUser(user dto.UpdateUserRequest) (*dto.UserResponse, error)
 	DeleteUser(ID uint) error
 }
 
@@ -47,9 +47,31 @@ func (service *userService) GetUsers() (*dto.UsersResponse, error) {
 	return dto.NewUsersResponse(users), nil
 }
 
-// func (service *userService) UpdateUser(user entity.User) (entity.User, error) {
-// 	return service.userRepository.UpdateUser(user)
-// }
+func (service *userService) UpdateUser(updateUserRequest dto.UpdateUserRequest) (*dto.UserResponse, error) {
+
+	user, err := service.userRepository.GetUser(updateUserRequest.ID)
+	if err != nil {
+		return nil, err
+	}
+	if updateUserRequest.Email != "" {
+		user.Email = updateUserRequest.Email
+	}
+	if updateUserRequest.FirstName != "" {
+		user.FirstName = updateUserRequest.FirstName
+	}
+	if updateUserRequest.LastName != "" {
+		user.LastName = updateUserRequest.LastName
+	}
+	if updateUserRequest.Password != "" {
+		user.Password = updateUserRequest.Password
+	}
+
+	user, err = service.userRepository.UpdateUser(*user)
+	if err != nil {
+		return nil, err
+	}
+	return dto.NewUserResponse(*user), nil
+}
 func (service *userService) DeleteUser(ID uint) error {
 	return service.userRepository.DeleteUser(ID)
 }

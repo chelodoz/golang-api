@@ -14,6 +14,13 @@ type UserResponse struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
+type UpdateUserRequest struct {
+	ID        uint   `json:"-"`
+	Email     string `json:"email" validate:"omitempty,email"`
+	FirstName string `json:"firstName" validate:"omitempty,gt=2"`
+	LastName  string `json:"lastName" validate:"omitempty,gt=2"`
+	Password  string `json:"password" validate:"omitempty,gt=6"`
+}
 
 type UsersResponse []*UserResponse
 
@@ -42,5 +49,14 @@ func (c *CreateUserRequest) ToEntity() *entity.User {
 		Email:     c.Email,
 		FirstName: c.FirstName,
 		LastName:  c.LastName,
+	}
+}
+func (c *UpdateUserRequest) ToEntity() *entity.User {
+	return &entity.User{
+		ID:        c.ID,
+		FirstName: c.FirstName,
+		LastName:  c.LastName,
+		Email:     c.Email,
+		Password:  c.Password,
 	}
 }

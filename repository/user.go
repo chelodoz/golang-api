@@ -61,8 +61,12 @@ func (userRepository *userRepository) CreateUser(user entity.User) (*entity.User
 }
 
 func (userRepository *userRepository) UpdateUser(user entity.User) (*entity.User, error) {
-	err := userRepository.DB.Save(&user).Error
-	return &user, err
+	userGorm := NewUserGorm(user)
+	err := userRepository.DB.Updates(&userGorm).Error
+	if err != nil {
+		return nil, err
+	}
+	return userGorm.ToEntity()
 }
 
 func (userRepository *userRepository) DeleteUser(ID uint) error {
