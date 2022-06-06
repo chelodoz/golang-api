@@ -74,9 +74,18 @@ func (userRepository *userRepository) DeleteUser(ID uint) error {
 	return err
 }
 
-func (userRepository *userRepository) GetUser(ID uint) (*entity.User, error) {
+func (userRepository *userRepository) GetUserByID(ID uint) (*entity.User, error) {
 	userGorm := &UserGorm{ID: ID}
 	err := userRepository.DB.First(&userGorm).Error
+	if err != nil {
+		return &entity.User{}, err
+	}
+	return userGorm.ToEntity()
+}
+
+func (userRepository *userRepository) GetUserByEmail(email string) (*entity.User, error) {
+	userGorm := &UserGorm{Email: email}
+	err := userRepository.DB.First(&userGorm, "email = ?", email).Error
 	if err != nil {
 		return &entity.User{}, err
 	}

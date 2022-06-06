@@ -45,7 +45,7 @@ func (u *userHandler) GetUsers(rw http.ResponseWriter, r *http.Request) {
 
 func (u *userHandler) GetUser(rw http.ResponseWriter, r *http.Request) {
 	userId := getUserID(r)
-	user, err := u.service.GetUser(userId)
+	user, err := u.service.GetUserByID(userId)
 	if err != nil {
 		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
 		return
@@ -56,7 +56,7 @@ func (u *userHandler) GetUser(rw http.ResponseWriter, r *http.Request) {
 
 func (u *userHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 	userId := getUserID(r)
-	if _, err := u.service.GetUser(userId); err != nil {
+	if _, err := u.service.GetUserByID(userId); err != nil {
 		dto.WriteResponse(rw, http.StatusNotFound, dto.ServiceError{Message: "The specified resource does not exist"})
 		return
 	}

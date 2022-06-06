@@ -3,7 +3,9 @@ module golang-api
 go 1.18
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
 	github.com/spf13/viper v1.12.0
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4

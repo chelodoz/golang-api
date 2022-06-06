@@ -8,7 +8,8 @@ type User struct {
 	Password  string
 }
 type UserRepository interface {
-	GetUser(ID uint) (*User, error)
+	GetUserByID(ID uint) (*User, error)
+	GetUserByEmail(email string) (*User, error)
 	GetUsers() ([]User, error)
 	CreateUser(User User) (*User, error)
 	UpdateUser(User User) (*User, error)

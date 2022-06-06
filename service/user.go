@@ -9,7 +9,7 @@ import (
 type UserService interface {
 	CreateUser(user dto.CreateUserRequest) (*dto.UserResponse, error)
 	GetUsers() (*dto.UsersResponse, error)
-	GetUser(ID uint) (*dto.UserResponse, error)
+	GetUserByID(ID uint) (*dto.UserResponse, error)
 	UpdateUser(user dto.UpdateUserRequest) (*dto.UserResponse, error)
 	DeleteUser(ID uint) error
 }
@@ -38,8 +38,8 @@ func (service *userService) CreateUser(createUserRequest dto.CreateUserRequest) 
 	return dto.NewUserResponse(*user), nil
 }
 
-func (service *userService) GetUser(ID uint) (*dto.UserResponse, error) {
-	user, err := service.userRepository.GetUser(ID)
+func (service *userService) GetUserByID(ID uint) (*dto.UserResponse, error) {
+	user, err := service.userRepository.GetUserByID(ID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (service *userService) GetUsers() (*dto.UsersResponse, error) {
 
 func (service *userService) UpdateUser(updateUserRequest dto.UpdateUserRequest) (*dto.UserResponse, error) {
 
-	user, err := service.userRepository.GetUser(updateUserRequest.ID)
+	user, err := service.userRepository.GetUserByID(updateUserRequest.ID)
 	if err != nil {
 		return nil, err
 	}
