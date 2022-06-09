@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"golang-api/dto"
 	"golang-api/service"
+	"golang-api/util"
 	"net/http"
-	"time"
 )
 
 type LoginHandler interface {
@@ -15,12 +15,14 @@ type LoginHandler interface {
 type loginHandler struct {
 	loginService service.LoginService
 	jWtService   service.JWTService
+	config       util.Config
 }
 
-func NewLoginHandler(loginService service.LoginService, jWtService service.JWTService) LoginHandler {
+func NewLoginHandler(loginService service.LoginService, jWtService service.JWTService, config util.Config) LoginHandler {
 	return &loginHandler{
 		loginService: loginService,
 		jWtService:   jWtService,
+		config:       config,
 	}
 }
 
@@ -41,7 +43,7 @@ func (handler *loginHandler) Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := handler.jWtService.CreateToken(loginRequest.Email, time.Minute)
+	token, err := handler.jWtService.CreateToken(loginRequest.Email, handler.config.AccessTokenDuration)
 
 	if err != nil {
 		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
