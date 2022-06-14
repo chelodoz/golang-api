@@ -1,4 +1,4 @@
-package service
+package util
 
 import (
 	"errors"
@@ -16,50 +16,38 @@ var (
 	minSecretKeySize = 32
 )
 
-// JWTService is an interface for managing tokens
-type JWTService interface {
-	//CreateToken creates a new token for a specific username and duration
-	CreateToken(username string, duration time.Duration) (string, error)
-
-	//VerifyToken checks if the token is valid or not
-	VerifyToken(token string) (*JWTPayload, error)
-}
-
-type jwtService struct {
-	secretKey string
-}
-
-func NewJWTService(secretKey string) (JWTService, error) {
-	if len(secretKey) < minSecretKeySize {
-		return nil, fmt.Errorf("invalid key size:must be at least %d characters", minSecretKeySize)
-	}
-	return &jwtService{secretKey}, nil
-}
-
 //CreateToken creates a new token for a specific username and duration
-func (jwtSrv *jwtService) CreateToken(username string, duration time.Duration) (string, error) {
-
+func CreateToken(username string, duration time.Duration, secretKey string) (string, *JWTPayload, error) {
+	if err := secretKeyValidation(secretKey); err != nil {
+		return "", nil, err
+	}
 	// Set custom and standard claims
 	jwtPayload, err := newJWTPayload(username, duration)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	// Create token with claims
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtPayload)
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtPayload)
 
 	// Generate encoded token using the secret signing key
-	return token.SignedString([]byte(jwtSrv.secretKey))
+	token, err := jwtToken.SignedString([]byte(secretKey))
+	if err != nil {
+		return "", nil, err
+	}
+	return token, jwtPayload, nil
 }
 
 //VerifyToken checks if the token is valid or not
-func (jwtSrv *jwtService) VerifyToken(token string) (*JWTPayload, error) {
-
+func VerifyToken(token string, secretKey string) (*JWTPayload, error) {
+	if err := secretKeyValidation(secretKey); err != nil {
+		return nil, err
+	}
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
 			return nil, ErrInvalidToken
 		}
-		return []byte(jwtSrv.secretKey), nil
+		return []byte(secretKey), nil
 	}
 	jwtToken, err := jwt.ParseWithClaims(token, &JWTPayload{}, keyFunc)
 
@@ -78,11 +66,18 @@ func (jwtSrv *jwtService) VerifyToken(token string) (*JWTPayload, error) {
 	return jwtPayload, nil
 }
 
+func secretKeyValidation(secretKey string) error {
+	if len(secretKey) < minSecretKeySize {
+		return fmt.Errorf("invalid key size:must be at least %d characters", minSecretKeySize)
+	}
+	return nil
+}
+
 type JWTPayload struct {
-	ID        uuid.UUID `json:id`
-	Username  string    `json:username`
-	IssuedAt  time.Time `json:issuedAt`
-	ExpiredAt time.Time `json:expiredAt`
+	ID        uuid.UUID
+	Username  string
+	IssuedAt  time.Time
+	ExpiredAt time.Time
 }
 
 func (jwtPayload *JWTPayload) Valid() error {
@@ -93,7 +88,7 @@ func (jwtPayload *JWTPayload) Valid() error {
 }
 
 func newJWTPayload(username string, duration time.Duration) (*JWTPayload, error) {
-	tokenID, err := uuid.NewRandom()
+	tokenID, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err
 	}

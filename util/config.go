@@ -12,12 +12,14 @@ type Config struct {
 	HTTPServerAddress    string        `mapstructure:"HTTP_SERVER_ADDRESS"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	JWTSecretKey         string        `mapstructure:"JWT_SECRET_KEY"`
 	DBHost               string        `mapstructure:"DB_HOST"`
 	DBDriver             string        `mapstructure:"DB_DRIVER"`
 	DBUser               string        `mapstructure:"DB_USER"`
 	DBPassword           string        `mapstructure:"DB_PASSWORD"`
 	DBName               string        `mapstructure:"DB_NAME"`
 	DBPort               string        `mapstructure:"DB_PORT"`
+	CACHEHost            string        `mapstructure:"CACHE_HOST"`
 }
 
 // LoadConfig reads configuration from file or environment variables.

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"golang-api/dto"
-	"golang-api/service"
+	"golang-api/util"
 
 	"net/http"
 	"strings"
@@ -16,11 +16,11 @@ const (
 )
 
 type JwtMiddleware struct {
-	jwtService service.JWTService
+	config util.Config
 }
 
-func NewJwtMiddleware(service service.JWTService) *JwtMiddleware {
-	return &JwtMiddleware{jwtService: service}
+func NewJwtMiddleware(config util.Config) *JwtMiddleware {
+	return &JwtMiddleware{config}
 }
 
 // AuthorizeJWT validates the token from the http request, returning a 401 if it's not valid
@@ -50,7 +50,7 @@ func (middleware *JwtMiddleware) AuthorizeJWT() func(http.Handler) http.Handler 
 			}
 
 			accessToken := fields[1]
-			_, err := middleware.jwtService.VerifyToken(accessToken)
+			_, err := util.VerifyToken(accessToken, middleware.config.JWTSecretKey)
 			if err != nil {
 				dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
 				return

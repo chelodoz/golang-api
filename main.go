@@ -32,12 +32,12 @@ func startHTTPServer(config util.Config) {
 	db, _ := database.DBConnection(config)
 
 	userRepository := repository.NewUserRepository(db)
+	tokenRepository := repository.NewRedisCache(config.CACHEHost, 0, 14000)
 	userService := service.NewUserService(userRepository)
-	loginService := service.NewLoginService(userRepository)
-	jwtService, _ := service.NewJWTService("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-	jwtMiddleware := middleware.NewJwtMiddleware(jwtService)
+	authService := service.NewAuthService(userRepository, tokenRepository, config)
+	jwtMiddleware := middleware.NewJwtMiddleware(config)
 	userHandler := handler.NewUserHandler(userService)
-	loginHandler := handler.NewLoginHandler(loginService, jwtService, config)
+	authHandler := handler.NewAuthHandler(authService, config)
 
 	router := mux.NewRouter()
 
@@ -49,7 +49,7 @@ func startHTTPServer(config util.Config) {
 	secure.HandleFunc("/users/{id}", userHandler.GetUser).Methods(http.MethodGet)
 	secure.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods(http.MethodPatch)
 
-	router.HandleFunc("/login", loginHandler.Login).Methods(http.MethodPost)
+	router.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
 
 	// CORS
 	cors := handlers.CORS(handlers.AllowedOrigins([]string{"*"}))
