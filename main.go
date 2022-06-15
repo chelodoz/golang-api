@@ -29,7 +29,11 @@ func main() {
 
 func startHTTPServer(config util.Config) {
 
-	db, _ := database.DBConnection(config)
+	db, err := database.DBConnection(config)
+	if err != nil {
+		log.Printf("Error starting database: %s\n", err)
+		os.Exit(1)
+	}
 
 	userRepository := repository.NewUserRepository(db)
 	tokenRepository := repository.NewRedisCache(config.CACHEHost, 0, 14000)
@@ -49,7 +53,10 @@ func startHTTPServer(config util.Config) {
 	secure.HandleFunc("/users/{id}", userHandler.GetUser).Methods(http.MethodGet)
 	secure.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods(http.MethodPatch)
 
-	router.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
+	auth := router.NewRoute().PathPrefix("/auth").Subrouter()
+	auth.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
+	auth.HandleFunc("/logout", authHandler.Logout).Methods(http.MethodDelete)
+	// auth.HandleFunc("/revoke", authHandler.Revoke).Methods(http.MethodDelete)
 
 	// CORS
 	cors := handlers.CORS(handlers.AllowedOrigins([]string{"*"}))

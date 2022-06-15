@@ -8,7 +8,8 @@ import (
 
 type AuthService interface {
 	Login(email string, password string) bool
-	Logout(ctx context.Context, email string) error
+	Logout(ctx context.Context, email string, token string) error
+	Revoke(ctx context.Context, email string) error
 	CreateTokens(ctx context.Context, email string, prevTokenID string) (*entity.TokenDetails, error)
 }
 
@@ -51,7 +52,10 @@ func (authService *authService) CreateTokens(ctx context.Context, email string, 
 
 }
 
-func (authService *authService) Logout(ctx context.Context, email string) error {
+func (authService *authService) Logout(ctx context.Context, email string, token string) error {
+	return authService.tokenRepository.DeleteRefreshToken(ctx, email, token)
+}
+func (authService *authService) Revoke(ctx context.Context, email string) error {
 	return authService.tokenRepository.DeleteUserRefreshTokens(ctx, email)
 }
 

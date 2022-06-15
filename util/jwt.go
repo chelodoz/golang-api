@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -11,9 +12,11 @@ import (
 
 // Different types of error returned by the VerifyToken function
 var (
-	ErrInvalidToken  = errors.New("token is invalid")
-	ErrExpiredToken  = errors.New("token has expired")
-	minSecretKeySize = 32
+	ErrInvalidToken         = errors.New("token is invalid")
+	ErrExpiredToken         = errors.New("token has expired")
+	minSecretKeySize        = 32
+	authorizationHeaderKey  = "authorization"
+	authorizationTypeBearer = "bearer"
 )
 
 //CreateToken creates a new token for a specific username and duration
@@ -64,6 +67,24 @@ func VerifyToken(token string, secretKey string) (*JWTPayload, error) {
 		return nil, ErrInvalidToken
 	}
 	return jwtPayload, nil
+}
+
+func ValidateBearerHeader(authorizationHeader string) (string, error) {
+	if len(authorizationHeader) == 0 {
+		return "", errors.New("authorization header is not provided")
+	}
+
+	fields := strings.Fields(authorizationHeader)
+	if len(fields) < 2 {
+		return "", errors.New("invalid authorization header format")
+	}
+
+	authorizationType := strings.ToLower(fields[0])
+	if authorizationType != authorizationTypeBearer {
+
+		return "", fmt.Errorf("unsupported authorization type %s", authorizationType)
+	}
+	return fields[1], nil
 }
 
 func secretKeyValidation(secretKey string) error {

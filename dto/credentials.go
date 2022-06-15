@@ -14,3 +14,7 @@ type LoginResponse struct {
 	RefreshTokenExpiresAt time.Time `json:"refreshTokenExpiresAt"`
 	Email                 string    `json:"email"`
 }
+
+type LogoutRequest struct {
+	RefreshToken string `json:"refreshToken" binding:"required"`
+}
