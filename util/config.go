@@ -19,7 +19,8 @@ type Config struct {
 	DBPassword           string        `mapstructure:"DB_PASSWORD"`
 	DBName               string        `mapstructure:"DB_NAME"`
 	DBPort               string        `mapstructure:"DB_PORT"`
-	CACHEHost            string        `mapstructure:"CACHE_HOST"`
+	RedisHost            string        `mapstructure:"REDIS_HOST"`
+	RedisPort            string        `mapstructure:"REDIS_PORT"`
 }
 
 // LoadConfig reads configuration from file or environment variables.

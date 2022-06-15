@@ -11,6 +11,7 @@ import (
 type AuthHandler interface {
 	Login(rw http.ResponseWriter, r *http.Request)
 	Logout(rw http.ResponseWriter, r *http.Request)
+	Revoke(rw http.ResponseWriter, r *http.Request)
 }
 
 type authHandler struct {
@@ -87,7 +88,31 @@ func (handler *authHandler) Logout(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := handler.authService.Logout(r.Context(), refreshPayload.Username, logoutRequest.RefreshToken); err != nil {
+	if err := handler.authService.Logout(r.Context(), refreshPayload.UserEmail, logoutRequest.RefreshToken); err != nil {
+		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: "Unauthorized"})
+		return
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
+}
+
+// Remove all sessions of presented email in access token
+func (handler *authHandler) Revoke(rw http.ResponseWriter, r *http.Request) {
+
+	authorizationHeader := r.Header.Get("authorization")
+	accessToken, err := util.ValidateBearerHeader(authorizationHeader)
+	if err != nil {
+		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
+		return
+	}
+
+	accessPayload, err := util.VerifyToken(accessToken, handler.config.JWTSecretKey)
+	if err != nil {
+		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
+		return
+	}
+
+	if err := handler.authService.Revoke(r.Context(), accessPayload.UserEmail); err != nil {
 		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: "Unauthorized"})
 		return
 	}

@@ -36,14 +36,14 @@ func startHTTPServer(config util.Config) {
 	}
 
 	userRepository := repository.NewUserRepository(db)
-	tokenRepository := repository.NewRedisCache(config.CACHEHost, 0, 14000)
+	tokenRepository := repository.NewRedisCache(config.RedisHost, config.RedisPort, 0)
 	userService := service.NewUserService(userRepository)
 	authService := service.NewAuthService(userRepository, tokenRepository, config)
 	jwtMiddleware := middleware.NewJwtMiddleware(config)
 	userHandler := handler.NewUserHandler(userService)
 	authHandler := handler.NewAuthHandler(authService, config)
 
-	router := mux.NewRouter()
+	router := mux.NewRouter().PathPrefix("/api/v1").Subrouter()
 
 	secure := router.NewRoute().PathPrefix("/secure").Subrouter()
 	secure.Use(jwtMiddleware.AuthorizeJWT())
@@ -56,7 +56,7 @@ func startHTTPServer(config util.Config) {
 	auth := router.NewRoute().PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
 	auth.HandleFunc("/logout", authHandler.Logout).Methods(http.MethodDelete)
-	// auth.HandleFunc("/revoke", authHandler.Revoke).Methods(http.MethodDelete)
+	auth.HandleFunc("/revoke", authHandler.Revoke).Methods(http.MethodDelete)
 
 	// CORS
 	cors := handlers.CORS(handlers.AllowedOrigins([]string{"*"}))

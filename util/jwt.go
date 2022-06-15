@@ -15,7 +15,6 @@ var (
 	ErrInvalidToken         = errors.New("token is invalid")
 	ErrExpiredToken         = errors.New("token has expired")
 	minSecretKeySize        = 32
-	authorizationHeaderKey  = "authorization"
 	authorizationTypeBearer = "bearer"
 )
 
@@ -96,7 +95,7 @@ func secretKeyValidation(secretKey string) error {
 
 type JWTPayload struct {
 	ID        uuid.UUID
-	Username  string
+	UserEmail string
 	IssuedAt  time.Time
 	ExpiredAt time.Time
 }
@@ -108,7 +107,7 @@ func (jwtPayload *JWTPayload) Valid() error {
 	return nil
 }
 
-func newJWTPayload(username string, duration time.Duration) (*JWTPayload, error) {
+func newJWTPayload(userEmail string, duration time.Duration) (*JWTPayload, error) {
 	tokenID, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err
@@ -116,7 +115,7 @@ func newJWTPayload(username string, duration time.Duration) (*JWTPayload, error)
 
 	jwtPayload := &JWTPayload{
 		ID:        tokenID,
-		Username:  username,
+		UserEmail: userEmail,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(duration),
 	}
