@@ -28,6 +28,13 @@ func NewAuthService(userRepository entity.UserRepository, tokenRepository entity
 }
 
 func (authService *authService) CreateTokens(ctx context.Context, email string, prevTokenID string) (*entity.TokenDetails, error) {
+
+	if prevTokenID != "" {
+		if err := authService.tokenRepository.DeleteRefreshToken(ctx, email, prevTokenID); err != nil {
+			return nil, err
+		}
+	}
+
 	accessToken, accessJwtPayload, err := util.CreateToken(email, authService.config.AccessTokenDuration, authService.config.JWTSecretKey)
 	if err != nil {
 		return nil, err

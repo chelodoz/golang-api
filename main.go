@@ -57,6 +57,7 @@ func startHTTPServer(config util.Config) {
 	auth.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
 	auth.HandleFunc("/logout", authHandler.Logout).Methods(http.MethodDelete)
 	auth.HandleFunc("/revoke", authHandler.Revoke).Methods(http.MethodDelete)
+	auth.HandleFunc("/refresh", authHandler.Refresh).Methods(http.MethodPost)
 
 	// CORS
 	cors := handlers.CORS(handlers.AllowedOrigins([]string{"*"}))
