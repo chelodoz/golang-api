@@ -61,7 +61,7 @@ func (handler *authHandler) Login(rw http.ResponseWriter, r *http.Request) {
 
 // Remove the given refresh token
 func (handler *authHandler) Logout(rw http.ResponseWriter, r *http.Request) {
-	var logoutRequest dto.RefreshTokenRequest
+	var logoutRequest dto.TokenRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&logoutRequest); err != nil {
 		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
@@ -73,14 +73,7 @@ func (handler *authHandler) Logout(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authorizationHeader := r.Header.Get("authorization")
-	accessToken, err := util.ValidateBearerHeader(authorizationHeader)
-	if err != nil {
-		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
-		return
-	}
-
-	_, err = util.VerifyToken(accessToken, handler.config.JWTSecretKey)
+	_, err := util.VerifyToken(logoutRequest.AccessToken, handler.config.JWTSecretKey)
 	if err != nil {
 		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
 		return
@@ -102,15 +95,19 @@ func (handler *authHandler) Logout(rw http.ResponseWriter, r *http.Request) {
 
 // Remove all sessions of presented email in access token
 func (handler *authHandler) Revoke(rw http.ResponseWriter, r *http.Request) {
+	var revokeRequest dto.AccessTokenRequest
 
-	authorizationHeader := r.Header.Get("authorization")
-	accessToken, err := util.ValidateBearerHeader(authorizationHeader)
-	if err != nil {
-		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&revokeRequest); err != nil {
+		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
 		return
 	}
 
-	accessPayload, err := util.VerifyToken(accessToken, handler.config.JWTSecretKey)
+	if err := validate.Struct(&revokeRequest); err != nil {
+		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
+		return
+	}
+
+	accessPayload, err := util.VerifyToken(revokeRequest.AccessToken, handler.config.JWTSecretKey)
 	if err != nil {
 		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
 		return
@@ -126,7 +123,7 @@ func (handler *authHandler) Revoke(rw http.ResponseWriter, r *http.Request) {
 
 // Refresh both tokens if access token is expired and refresh token is still valid
 func (handler *authHandler) Refresh(rw http.ResponseWriter, r *http.Request) {
-	var logoutRequest dto.RefreshTokenRequest
+	var logoutRequest dto.TokenRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&logoutRequest); err != nil {
 		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
@@ -138,14 +135,7 @@ func (handler *authHandler) Refresh(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authorizationHeader := r.Header.Get("authorization")
-	accessToken, err := util.ValidateBearerHeader(authorizationHeader)
-	if err != nil {
-		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
-		return
-	}
-
-	_, err = util.VerifyToken(accessToken, handler.config.JWTSecretKey)
+	_, err := util.VerifyToken(logoutRequest.AccessToken, handler.config.JWTSecretKey)
 	if err != util.ErrExpiredToken {
 		dto.WriteResponse(rw, http.StatusUnauthorized, dto.ServiceError{Message: err.Error()})
 		return

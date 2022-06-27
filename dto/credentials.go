@@ -15,6 +15,10 @@ type LoginResponse struct {
 	Email                 string    `json:"email"`
 }
 
-type RefreshTokenRequest struct {
+type TokenRequest struct {
+	AccessToken  string `json:"accessToken"  binding:"required"`
 	RefreshToken string `json:"refreshToken" binding:"required"`
+}
+type AccessTokenRequest struct {
+	AccessToken string `json:"accessToken"  binding:"required"`
 }
