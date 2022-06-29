@@ -32,6 +32,7 @@ func NewUserHandler(service service.UserService) UserHandler {
 	}
 }
 
+//GetUser returns the users from the data store
 func (u *userHandler) GetUsers(rw http.ResponseWriter, r *http.Request) {
 
 	users, err := u.service.GetUsers()
@@ -43,6 +44,7 @@ func (u *userHandler) GetUsers(rw http.ResponseWriter, r *http.Request) {
 	dto.WriteResponse(rw, http.StatusOK, users)
 }
 
+//	GetUser returns a user from the data store
 func (u *userHandler) GetUser(rw http.ResponseWriter, r *http.Request) {
 	userId := getUserID(r)
 	user, err := u.service.GetUserByID(userId)
@@ -54,6 +56,7 @@ func (u *userHandler) GetUser(rw http.ResponseWriter, r *http.Request) {
 	dto.WriteResponse(rw, http.StatusOK, user)
 }
 
+//	DeleteUser handles DELETE requests and removes users from the database
 func (u *userHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 	userId := getUserID(r)
 	if _, err := u.service.GetUserByID(userId); err != nil {
@@ -67,6 +70,8 @@ func (u *userHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 	}
 	rw.WriteHeader(http.StatusNoContent)
 }
+
+//	UpdateUser returns a user from the data store
 func (u *userHandler) UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	var updateUserRequest dto.UpdateUserRequest
 	userId := getUserID(r)
@@ -90,6 +95,7 @@ func (u *userHandler) UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	dto.WriteResponse(rw, http.StatusOK, user)
 }
 
+//	UpdateUser returns a user from the data store
 func (u *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 	var createUserRequest dto.CreateUserRequest
 
@@ -105,7 +111,7 @@ func (u *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 
 	user, err := u.service.CreateUser(createUserRequest)
 	if err != nil {
-		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
+		dto.WriteResponse(rw, http.StatusInternalServerError, dto.ServiceError{Message: err.Error()})
 		return
 	}
 
