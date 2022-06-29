@@ -1,0 +1,184 @@
+openapi: "3.0.2"
+
+info:
+  title: JWT PoC
+  description: A simple api for fun
+  version: "1.0"
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: local server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AppError:
+      description: AppError is generic error message returned by a server
+      properties:
+        message:
+          type: string
+    LoginResponse:
+      properties:
+        accessToken:
+          type: string
+        accessTokenExpiresAt:
+          format: date-time
+          type: string
+        email:
+          type: string
+        refreshToken:
+          type: string
+        refreshTokenExpiresAt:
+          format: date-time
+          type: string
+    LoginRequest:
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    TokenRequest:
+      properties:
+        refreshToken:
+          type: string
+        accessToken:
+          type: string
+    AccessTokenRequest:
+      properties:
+        accessToken:
+          type: string
+
+  responses:
+    BadRequestError:
+      description: One of the request inputs is not valid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AppError"
+          example:
+            message: Bad Request
+    NoContentError:
+      description: No content
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AppError"
+          example:
+            message: Unauthorized
+    InternalServerError:
+      description: The server encountered an internal error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AppError"
+          example:
+            message: Internal Server Error
+    LoginResponse:
+      description: Login response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LoginResponse"
+          example:
+            accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjA1NjFjMjcwLWY1YzQtMTFlYy04ODE2LWIwN2IyNTUwY2JiMSIsIlVzZXJFbWFpbCI6InRlc3Q4QGdtYWlsLmNvbSIsIklzc3VlZEF0IjoiMjAyMi0wNi0yNlQyMzo1MToxOS40Mzk0NTMyLTAzOjAwIiwiRXhwaXJlZEF0IjoiMjAyMi0wNi0yN1QwMDowNjoxOS40Mzk0NTMyLTAzOjAwIn0.0-JleAcb9Lq0KGxlCiDZmUOCHp4u1cjmAzs0jxYcAuM
+            accessTokenExpiresAt: 2022-06-27T00:06:19.4394532-03:00
+            refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjA1NjJiZjY0LWY1YzQtMTFlYy04ODE2LWIwN2IyNTUwY2JiMSIsIlVzZXJFbWFpbCI6InRlc3Q4QGdtYWlsLmNvbSIsIklzc3VlZEF0IjoiMjAyMi0wNi0yNlQyMzo1MToxOS40Mzk1NDkyLTAzOjAwIiwiRXhwaXJlZEF0IjoiMjAyMi0wNi0yN1QyMzo1MToxOS40Mzk1NDkyLTAzOjAwIn0.L-RUAV2uHBW7z6ay8BX4iAuFtW9gerSGjD7kZEqxytI
+            refreshTokenExpiresAt: 2022-06-27T23:51:19.4395492-03:00
+            email: test@gmail.com
+
+paths:
+  /auth/login:
+    post:
+      summary: Create JWT tokens
+      tags:
+        - Auth
+      description: Create a temporary access token and refresh token for a given mail of a user
+      requestBody:
+        description: Request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        201:
+          $ref: "#/components/responses/LoginResponse"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /auth/logout:
+    delete:
+      summary: Remove the given refresh token
+      tags:
+        - Auth
+      description: Remove the given refresh token
+      requestBody:
+        description: Request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+      responses:
+        204:
+          $ref: "#/components/responses/NoContentError"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /auth/revoke:
+    delete:
+      summary: Remove all tokens of a user
+      tags:
+        - Auth
+      description: Remove all sessions of a user
+      requestBody:
+        description: Request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessTokenRequest"
+      responses:
+        204:
+          $ref: "#/components/responses/NoContentError"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /auth/refresh:
+    post:
+      summary: Refresh an expired JWT token
+      tags:
+        - Auth
+      description: Refresh both tokens if access token is expired and refresh token is still valid
+      requestBody:
+        description: Request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+      responses:
+        201:
+          $ref: "#/components/responses/LoginResponse"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"

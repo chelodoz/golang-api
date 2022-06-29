@@ -43,9 +43,10 @@ func startHTTPServer(config util.Config) {
 	userHandler := handler.NewUserHandler(userService)
 	authHandler := handler.NewAuthHandler(authService, config)
 
-	router := mux.NewRouter().PathPrefix("/api/v1").Subrouter()
+	router := mux.NewRouter()
+	base := router.PathPrefix("/api/v1").Subrouter()
 
-	secure := router.NewRoute().PathPrefix("/secure").Subrouter()
+	secure := base.NewRoute().PathPrefix("/secure").Subrouter()
 	secure.Use(jwtMiddleware.AuthorizeJWT())
 	secure.HandleFunc("/users", userHandler.GetUsers).Methods(http.MethodGet)
 	secure.HandleFunc("/users", userHandler.CreateUser).Methods(http.MethodPost)
@@ -53,11 +54,14 @@ func startHTTPServer(config util.Config) {
 	secure.HandleFunc("/users/{id}", userHandler.GetUser).Methods(http.MethodGet)
 	secure.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods(http.MethodPatch)
 
-	auth := router.NewRoute().PathPrefix("/auth").Subrouter()
+	auth := base.NewRoute().PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
 	auth.HandleFunc("/logout", authHandler.Logout).Methods(http.MethodDelete)
 	auth.HandleFunc("/revoke", authHandler.Revoke).Methods(http.MethodDelete)
 	auth.HandleFunc("/refresh", authHandler.Refresh).Methods(http.MethodPost)
+
+	// Swagger
+	router.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", http.FileServer(http.Dir("./docs/swagger-ui-4.11.1"))))
 
 	// CORS
 	cors := handlers.CORS(handlers.AllowedOrigins([]string{"*"}))
