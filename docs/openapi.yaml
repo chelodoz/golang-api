@@ -52,6 +52,36 @@ components:
       properties:
         accessToken:
           type: string
+    GetUser:
+      properties:
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+    UpdateUser:
+      properties:
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        password:
+          type: string
+
+  parameters:
+    userIdParam:
+      in: path
+      name: userId
+      required: true
+      description: User Id
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
 
   responses:
     BadRequestError:
@@ -62,7 +92,7 @@ components:
             $ref: "#/components/schemas/AppError"
           example:
             message: Bad Request
-    NoContentError:
+    NoContent:
       description: No content
     UnauthorizedError:
       description: Access token is missing or invalid
@@ -92,6 +122,31 @@ components:
             refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjA1NjJiZjY0LWY1YzQtMTFlYy04ODE2LWIwN2IyNTUwY2JiMSIsIlVzZXJFbWFpbCI6InRlc3Q4QGdtYWlsLmNvbSIsIklzc3VlZEF0IjoiMjAyMi0wNi0yNlQyMzo1MToxOS40Mzk1NDkyLTAzOjAwIiwiRXhwaXJlZEF0IjoiMjAyMi0wNi0yN1QyMzo1MToxOS40Mzk1NDkyLTAzOjAwIn0.L-RUAV2uHBW7z6ay8BX4iAuFtW9gerSGjD7kZEqxytI
             refreshTokenExpiresAt: 2022-06-27T23:51:19.4395492-03:00
             email: test@gmail.com
+    UsersResponse:
+      description: A list of users
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/GetUser"
+            example:
+              - email: test@gmail.com
+                firstName: John
+                lastName: Doe
+              - email: test@gmail.com
+                firstName: John
+                lastName: Doe
+    UserResponse:
+      description: A user
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetUser"
+          example:
+            email: test1@gmail.com
+            firstName: Gin
+            lastName: Gonic
 
 paths:
   /auth/login:
@@ -131,7 +186,7 @@ paths:
               $ref: "#/components/schemas/TokenRequest"
       responses:
         204:
-          $ref: "#/components/responses/NoContentError"
+          $ref: "#/components/responses/NoContent"
         400:
           $ref: "#/components/responses/BadRequestError"
         401:
@@ -153,7 +208,7 @@ paths:
               $ref: "#/components/schemas/AccessTokenRequest"
       responses:
         204:
-          $ref: "#/components/responses/NoContentError"
+          $ref: "#/components/responses/NoContent"
         400:
           $ref: "#/components/responses/BadRequestError"
         401:
@@ -180,5 +235,61 @@ paths:
           $ref: "#/components/responses/BadRequestError"
         401:
           $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /secure/users:
+    get:
+      tags:
+        - Users
+      description: List all users
+      responses:
+        200:
+          $ref: "#/components/responses/UsersResponse"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Users
+      description: Create a user
+      responses:
+        201:
+          $ref: "#/components/responses/UsersResponse"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /secure/users/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/userIdParam"
+    get:
+      tags:
+        - Users
+      description: Retrieve a user
+      responses:
+        200:
+          $ref: "#/components/responses/UserResponse"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Users
+      description: Update a user
+      requestBody:
+        description: Request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUser"
+      responses:
+        200:
+          $ref: "#/components/responses/UserResponse"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - Users
+      description: Delete a user
+      responses:
+        204:
+          $ref: "#/components/responses/NoContent"
         500:
           $ref: "#/components/responses/InternalServerError"

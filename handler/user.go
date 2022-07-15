@@ -32,19 +32,19 @@ func NewUserHandler(service service.UserService) UserHandler {
 	}
 }
 
-//GetUser returns the users from the data store
+//GetUser handles GET requests and returns all the users from the data store
 func (u *userHandler) GetUsers(rw http.ResponseWriter, r *http.Request) {
 
 	users, err := u.service.GetUsers()
 	if err != nil {
-		dto.WriteResponse(rw, http.StatusBadRequest, dto.ServiceError{Message: err.Error()})
+		dto.WriteResponse(rw, http.StatusInternalServerError, dto.ServiceError{Message: err.Error()})
 		return
 	}
 
 	dto.WriteResponse(rw, http.StatusOK, users)
 }
 
-//	GetUser returns a user from the data store
+//	GetUser GET/{userId} DELETE requests and returns a user from the data store
 func (u *userHandler) GetUser(rw http.ResponseWriter, r *http.Request) {
 	userId := getUserID(r)
 	user, err := u.service.GetUserByID(userId)
@@ -71,7 +71,7 @@ func (u *userHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-//	UpdateUser returns a user from the data store
+//	UpdateUser handles PATCH requests and update the given fields of a user into the data store
 func (u *userHandler) UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	var updateUserRequest dto.UpdateUserRequest
 	userId := getUserID(r)
@@ -95,7 +95,7 @@ func (u *userHandler) UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	dto.WriteResponse(rw, http.StatusOK, user)
 }
 
-//	UpdateUser returns a user from the data store
+//	CreateUser handles POST requests and create a user into the data store
 func (u *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 	var createUserRequest dto.CreateUserRequest
 
@@ -121,7 +121,7 @@ func (u *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 func getUserID(r *http.Request) uint {
 	vars := mux.Vars(r)
 	// convert the id into an integer and return
-	id, err := strconv.ParseUint(vars["id"], 10, 64)
+	id, err := strconv.ParseUint(vars["userId"], 10, 64)
 	if err != nil {
 		panic(err)
 	}

@@ -50,9 +50,9 @@ func startHTTPServer(config util.Config) {
 	secure.Use(jwtMiddleware.AuthorizeJWT())
 	secure.HandleFunc("/users", userHandler.GetUsers).Methods(http.MethodGet)
 	secure.HandleFunc("/users", userHandler.CreateUser).Methods(http.MethodPost)
-	secure.HandleFunc("/users", userHandler.DeleteUser).Methods(http.MethodDelete)
-	secure.HandleFunc("/users/{id}", userHandler.GetUser).Methods(http.MethodGet)
-	secure.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods(http.MethodPatch)
+	secure.HandleFunc("/users/{userId}", userHandler.DeleteUser).Methods(http.MethodDelete)
+	secure.HandleFunc("/users/{userId}", userHandler.GetUser).Methods(http.MethodGet)
+	secure.HandleFunc("/users/{userId}", userHandler.UpdateUser).Methods(http.MethodPatch)
 
 	auth := base.NewRoute().PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
